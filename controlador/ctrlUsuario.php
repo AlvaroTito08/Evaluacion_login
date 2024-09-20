@@ -35,5 +35,27 @@ class ctrlUsuario {
             return false;
         }
     }
+    public function marcarActivo($id_usuario) {
+        try {
+            $sqlUpdate = "UPDATE usuarios SET estado = 1 WHERE id_usuario = :id_usuario";
+            $stmtUpdate = $this->conexion->prepare($sqlUpdate);
+            $stmtUpdate->bindParam(':id_usuario', $id_usuario);
+            $stmtUpdate->execute();
+            return true;
+        } catch (PDOException $e) {
+            return array("error" => $e->getMessage());
+        }
+    }
+    public function marcarInactivo($id_usuario) {
+        try {
+            $sqlUpdate = "UPDATE usuarios SET estado = 0 WHERE id_usuario = :id_usuario";
+            $stmtUpdate = $this->conexion->prepare($sqlUpdate);
+            $stmtUpdate->bindParam(':id_usuario', $id_usuario);
+            $stmtUpdate->execute();
+            return true;
+        } catch (PDOException $e) {
+            return array("error" => $e->getMessage());
+        }
+    }
 }
 ?>

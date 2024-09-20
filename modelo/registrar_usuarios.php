@@ -38,29 +38,41 @@ if (isset($data['operacion'])) {
         if (isset($data['nombre']) && isset($data['password'])) {
             $nombre = $data['nombre'];
             $password = $data['password'];
-            $usuario = $usuarioCtrl->verificarUsuario($nombre, $password);
-            if ($usuario) {
+            $usuarios = $usuarioCtrl->verificarUsuario($nombre, $password);
+            if ($usuarios) {
                 session_start();
-                $_SESSION['usuario'] = $usuario['nombre'];
-                echo json_encode(array("mensaje" => "Login exitoso", "usuario" => $usuario['nombre']));
+                $_SESSION['usuario'] = $usuarios['nombre'];
+                $_SESSION['id_usuario'] = $usuarios['id_usuario'];
+                if ($usuarioCtrl->marcarActivo($usuarios['id_usuario'])) {
+                    echo json_encode(array(
+                        "mensaje" => "Login exitoso",
+                        "usuario" => $usuarios['nombre'],
+                        "estado" => true
+                    ));
+                } else {
+                    echo json_encode(array("mensaje" => "Error al marcar el usuario como activo"));
+                }
             } else {
                 echo json_encode(array("mensaje" => "Credenciales incorrectas"));
             }
         } else {
             echo json_encode(array("mensaje" => "Faltan datos en la solicitud"));
         }
+    
     } elseif ($data['operacion'] === 'logout') {
+    
         session_start();
-        if (isset($_SESSION['usuario'])) {
-            session_destroy();
-            echo json_encode(array("mensaje" => "Logout exitoso"));
+        if (isset($_SESSION['usuario']) && isset($_SESSION['id_usuario'])) {
+            $id_usuario = $_SESSION['id_usuario'];
+            if ($usuarioCtrl->marcarInactivo($id_usuario)) {
+                session_destroy();
+                echo json_encode(array("mensaje" => "Logout exitoso", "estado" => false));
+            } else {
+                echo json_encode(array("mensaje" => "Error al marcar el usuario como inactivo"));
+            }
         } else {
             echo json_encode(array("mensaje" => "No hay sesión activa"));
         }
-    } else {
-        echo json_encode(array("mensaje" => "Operación no válida"));
     }
-} else {
-    echo json_encode(array("mensaje" => "No se especifico ninguna operacion"));
 }
 ?>
